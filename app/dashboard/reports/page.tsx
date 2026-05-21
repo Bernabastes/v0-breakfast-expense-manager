@@ -4,6 +4,7 @@ import { SpendingChart } from '@/components/reports/spending-chart'
 import { MemberSpendingChart } from '@/components/reports/member-spending-chart'
 import { FoodPopularityChart } from '@/components/reports/food-popularity-chart'
 import { TransactionHistory } from '@/components/reports/transaction-history'
+import { DailyPopularConsumer } from '@/components/reports/daily-popular-consumer'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default async function ReportsPage() {
@@ -64,6 +65,42 @@ export default async function ReportsPage() {
   // Calculate daily spending for the last 30 days
   const dailySpending = getDailySpending(consumptions)
 
+  // Calculate today's consumer rankings
+  const today = new Date().toISOString().split('T')[0]
+  const todayConsumptions = consumptions.filter((c) => c.consumption_date === today)
+  
+  const consumerRankings = members
+    .map((member) => {
+      const memberConsumptions = todayConsumptions.filter((c) => c.member_id === member.id)
+      const totalSpent = memberConsumptions.reduce((sum, c) => sum + Number(c.total_price), 0)
+      
+      // Group by food for breakdown
+      const foodMap = new Map<string, { name: string; quantity: number; totalCost: number }>()
+      memberConsumptions.forEach((c) => {
+        const foodName = c.food?.name || 'Unknown'
+        const existing = foodMap.get(foodName)
+        if (existing) {
+          existing.quantity += c.quantity
+          existing.totalCost += Number(c.total_price)
+        } else {
+          foodMap.set(foodName, {
+            name: foodName,
+            quantity: c.quantity,
+            totalCost: Number(c.total_price),
+          })
+        }
+      })
+      
+      return {
+        name: member.name,
+        totalSpent,
+        foodBreakdown: Array.from(foodMap.values()),
+      }
+    })
+    .filter((m) => m.totalSpent > 0)
+    .sort((a, b) => b.totalSpent - a.totalSpent)
+    .map((m, idx) => ({ ...m, rank: idx + 1 }))
+
   return (
     <div className="space-y-6">
       <div>
@@ -76,6 +113,7 @@ export default async function ReportsPage() {
       <Tabs defaultValue="overview" className="w-full">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="daily">Daily Report</TabsTrigger>
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
         </TabsList>
         
@@ -114,6 +152,10 @@ export default async function ReportsPage() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="daily" className="mt-4">
+          <DailyPopularConsumer rankings={consumerRankings} date={today} />
         </TabsContent>
 
         <TabsContent value="transactions" className="mt-4">
