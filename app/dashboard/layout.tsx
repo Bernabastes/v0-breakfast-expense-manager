@@ -18,6 +18,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
+import { LowBalanceAlert } from '@/components/notifications/low-balance-alert'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -135,6 +136,9 @@ export default function DashboardLayout({
           {children}
         </main>
       </div>
+      
+      {/* Low balance notifications */}
+      <LowBalanceAlert />
     </div>
   )
 }
