@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { AlertTriangle, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useLanguage } from '@/lib/i18n/language-context'
 
 interface LowBalanceMember {
   id: string
@@ -24,6 +25,7 @@ const CHECK_INTERVAL = 60000 // 1 minute
 export function LowBalanceAlert() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [notifiedMembers, setNotifiedMembers] = useState<Set<string>>(new Set())
+  const { t } = useLanguage()
 
   const checkBalances = useCallback(async () => {
     const supabase = createClient()
@@ -165,12 +167,13 @@ export function LowBalanceAlert() {
 
           <div className="flex-1 space-y-1">
             <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
-              Low Balance Alert
+              {t.notifications.lowBalance}
             </p>
             <p className="text-sm text-amber-700 dark:text-amber-300">
-              <span className="font-semibold">{notification.member.name}</span> has a low balance of{' '}
+              <span className="font-semibold">{notification.member.name}</span>{' '}
+              {t.notifications.balanceBelow}:{' '}
               <span className="font-semibold">
-                {notification.member.balance.toFixed(2)} ETB
+                {notification.member.balance.toFixed(2)} {t.common.currency}
               </span>
             </p>
           </div>
