@@ -5,6 +5,7 @@ import { MemberSpendingChart } from '@/components/reports/member-spending-chart'
 import { FoodPopularityChart } from '@/components/reports/food-popularity-chart'
 import { TransactionHistory } from '@/components/reports/transaction-history'
 import { DailyPopularConsumer } from '@/components/reports/daily-popular-consumer'
+import { MonthlyReport } from '@/components/reports/monthly-report'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default async function ReportsPage() {
@@ -114,6 +115,7 @@ export default async function ReportsPage() {
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="daily">Daily Report</TabsTrigger>
+          <TabsTrigger value="monthly">Monthly Report</TabsTrigger>
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
         </TabsList>
         
@@ -156,6 +158,14 @@ export default async function ReportsPage() {
 
         <TabsContent value="daily" className="mt-4">
           <DailyPopularConsumer rankings={consumerRankings} date={today} />
+        </TabsContent>
+
+        <TabsContent value="monthly" className="mt-4">
+          <MonthlyReport 
+            members={members} 
+            consumptions={consumptions} 
+            deposits={deposits} 
+          />
         </TabsContent>
 
         <TabsContent value="transactions" className="mt-4">
