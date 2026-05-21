@@ -18,7 +18,7 @@ interface Notification {
 }
 
 const LOW_BALANCE_THRESHOLD = 50
-const NOTIFICATION_DURATION = 5000 // 5 seconds
+const NOTIFICATION_DURATION = 10000 // 5 seconds
 const CHECK_INTERVAL = 60000 // 1 minute
 
 export function LowBalanceAlert() {
@@ -27,12 +27,12 @@ export function LowBalanceAlert() {
 
   const checkBalances = useCallback(async () => {
     const supabase = createClient()
-    
+
     const { data: members, error } = await supabase
       .from('members')
       .select('id, name, balance')
       .lt('balance', LOW_BALANCE_THRESHOLD)
-    
+
     if (error || !members) return
 
     const newNotifications: Notification[] = []
@@ -42,7 +42,7 @@ export function LowBalanceAlert() {
       // Only notify if we haven't notified about this member yet
       // or if their balance changed to a new low value
       const memberKey = `${member.id}-${Math.floor(Number(member.balance))}`
-      
+
       if (!notifiedMembers.has(memberKey)) {
         newNotifications.push({
           id: `${member.id}-${Date.now()}`,
@@ -70,9 +70,9 @@ export function LowBalanceAlert() {
     const timers = notifications.map((notification) => {
       const elapsed = Date.now() - notification.timestamp
       const remaining = Math.max(NOTIFICATION_DURATION - elapsed, 0)
-      
+
       return setTimeout(() => {
-        setNotifications((prev) => 
+        setNotifications((prev) =>
           prev.filter((n) => n.id !== notification.id)
         )
       }, remaining)
@@ -97,7 +97,7 @@ export function LowBalanceAlert() {
   // Also subscribe to realtime changes for instant notifications
   useEffect(() => {
     const supabase = createClient()
-    
+
     const channel = supabase
       .channel('members-balance-changes')
       .on(
@@ -111,10 +111,10 @@ export function LowBalanceAlert() {
           if (payload.new && 'balance' in payload.new) {
             const member = payload.new as { id: string; name: string; balance: number }
             const balance = Number(member.balance)
-            
+
             if (balance < LOW_BALANCE_THRESHOLD) {
               const memberKey = `${member.id}-${Math.floor(balance)}`
-              
+
               if (!notifiedMembers.has(memberKey)) {
                 setNotifications((prev) => [
                   ...prev,
@@ -162,7 +162,7 @@ export function LowBalanceAlert() {
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900">
             <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
           </div>
-          
+
           <div className="flex-1 space-y-1">
             <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
               Low Balance Alert
@@ -174,7 +174,7 @@ export function LowBalanceAlert() {
               </span>
             </p>
           </div>
-          
+
           <button
             onClick={() => dismissNotification(notification.id)}
             className="shrink-0 rounded-md p-1 text-amber-600 hover:bg-amber-100 hover:text-amber-900 dark:text-amber-400 dark:hover:bg-amber-900 dark:hover:text-amber-100"
@@ -182,12 +182,12 @@ export function LowBalanceAlert() {
             <X className="h-4 w-4" />
             <span className="sr-only">Dismiss</span>
           </button>
-          
+
           {/* Progress bar for auto-dismiss */}
           <div className="absolute bottom-0 left-0 right-0 h-1 overflow-hidden rounded-b-lg">
-            <div 
+            <div
               className="h-full bg-amber-400 dark:bg-amber-600 animate-shrink-width"
-              style={{ 
+              style={{
                 animationDuration: `${NOTIFICATION_DURATION}ms`,
                 animationTimingFunction: 'linear',
               }}
