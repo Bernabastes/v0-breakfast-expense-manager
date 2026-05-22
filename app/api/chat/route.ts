@@ -1,7 +1,11 @@
 import { streamText, convertToModelMessages, UIMessage, tool } from 'ai'
-import { google } from '@ai-sdk/google'
+import { createGroq } from '@ai-sdk/groq'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+
+const groq = createGroq({
+  apiKey: process.env.GROQ_API_KEY,
+})
 
 export const maxDuration = 30
 
@@ -280,7 +284,7 @@ Key points:
 - Be friendly and helpful`
 
   const result = streamText({
-    model: google('gemini-2.0-flash'),
+    model: groq('llama-3.3-70b-versatile'),
     system: systemPrompt,
     messages: await convertToModelMessages(messages),
     tools,
