@@ -141,6 +141,15 @@ export const translations = {
       balanceBelow: 'Balance is below 50 ETB',
     },
     
+    // Chatbot
+    chatbot: {
+      title: 'AI Assistant',
+      subtitle: 'Ask me about expenses',
+      placeholder: 'Type your message...',
+      greeting: 'Hello! I can help you with information about breakfast expenses, balances, and more. What would you like to know?',
+      suggestions: 'Try asking:',
+    },
+    
     // Auth
     auth: {
       login: 'Login',
@@ -295,6 +304,15 @@ export const translations = {
     notifications: {
       lowBalance: 'ዝቅተኛ ቀሪ ሂሳብ ማስጠንቀቂያ',
       balanceBelow: 'ቀሪ ሂሳብ ከ50 ብር በታች ነው',
+    },
+    
+    // Chatbot
+    chatbot: {
+      title: 'AI ረዳት',
+      subtitle: 'ስለ ወጪዎች ይጠይቁኝ',
+      placeholder: 'መልእክትዎን ይጻፉ...',
+      greeting: 'ሰላም! ስለ ቁርስ ወጪዎች፣ ቀሪ ሂሳቦች እና ሌሎች መረጃዎች ልረዳዎ እችላለሁ። ምን ማወቅ ይፈልጋሉ?',
+      suggestions: 'የሚጠቁ ጥያቄዎች:',
     },
     
     // Auth

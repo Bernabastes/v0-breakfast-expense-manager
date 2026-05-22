@@ -22,6 +22,7 @@ import { LowBalanceAlert } from '@/components/notifications/low-balance-alert'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LanguageSelector } from '@/components/language-selector'
 import { useLanguage } from '@/lib/i18n/language-context'
+import { AIChatbot } from '@/components/ai-chatbot'
 
 export default function DashboardLayout({
   children,
@@ -147,6 +148,9 @@ export default function DashboardLayout({
       
       {/* Low balance notifications */}
       <LowBalanceAlert />
+      
+      {/* AI Chatbot */}
+      <AIChatbot />
     </div>
   )
 }
