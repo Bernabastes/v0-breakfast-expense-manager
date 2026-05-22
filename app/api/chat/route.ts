@@ -14,7 +14,7 @@ export async function POST(req: Request) {
 
   const supabase = await createClient()
 
-  // Define tools for querying the database
+  // Define tools for querying the database - simplified schemas for Llama compatibility
   const tools = {
     getMembers: tool({
       description: 'Get all members with their current balances',
@@ -58,15 +58,12 @@ export async function POST(req: Request) {
     }),
 
     getMonthlySpending: tool({
-      description: 'Get total spending for the current month or a specific month',
-      inputSchema: z.object({
-        month: z.number().min(1).max(12).nullable().describe('Month number (1-12), null for current month'),
-        year: z.number().nullable().describe('Year, null for current year'),
-      }),
-      execute: async ({ month, year }) => {
+      description: 'Get total spending for the current month',
+      inputSchema: z.object({}),
+      execute: async () => {
         const now = new Date()
-        const targetMonth = month || (now.getMonth() + 1)
-        const targetYear = year || now.getFullYear()
+        const targetMonth = now.getMonth() + 1
+        const targetYear = now.getFullYear()
         
         const startDate = `${targetYear}-${String(targetMonth).padStart(2, '0')}-01`
         const endDate = targetMonth === 12 
@@ -92,18 +89,15 @@ export async function POST(req: Request) {
     }),
 
     getTopContributors: tool({
-      description: 'Get members who have deposited the most money (top contributors)',
-      inputSchema: z.object({
-        limit: z.number().min(1).max(10).nullable().describe('Number of top contributors to return'),
-      }),
-      execute: async ({ limit }) => {
+      description: 'Get the top 5 members who have deposited the most money',
+      inputSchema: z.object({}),
+      execute: async () => {
         const { data, error } = await supabase
           .from('deposits')
           .select('member_id, amount, members(name)')
 
         if (error) return { error: error.message }
 
-        // Aggregate deposits by member
         const memberTotals = new Map<string, { name: string; total: number }>()
         data?.forEach((d) => {
           const memberId = d.member_id
@@ -116,25 +110,22 @@ export async function POST(req: Request) {
         const sorted = Array.from(memberTotals.entries())
           .map(([id, { name, total }]) => ({ id, name, totalDeposits: total }))
           .sort((a, b) => b.totalDeposits - a.totalDeposits)
-          .slice(0, limit || 5)
+          .slice(0, 5)
 
         return { topContributors: sorted, currency: 'ETB' }
       },
     }),
 
     getTopConsumers: tool({
-      description: 'Get members who have spent the most money (top consumers)',
-      inputSchema: z.object({
-        limit: z.number().min(1).max(10).nullable().describe('Number of top consumers to return'),
-      }),
-      execute: async ({ limit }) => {
+      description: 'Get the top 5 members who have spent the most money',
+      inputSchema: z.object({}),
+      execute: async () => {
         const { data, error } = await supabase
           .from('consumptions')
           .select('member_id, total_price, members(name)')
 
         if (error) return { error: error.message }
 
-        // Aggregate spending by member
         const memberTotals = new Map<string, { name: string; total: number }>()
         data?.forEach((c) => {
           const memberId = c.member_id
@@ -147,7 +138,7 @@ export async function POST(req: Request) {
         const sorted = Array.from(memberTotals.entries())
           .map(([id, { name, total }]) => ({ id, name, totalSpending: total }))
           .sort((a, b) => b.totalSpending - a.totalSpending)
-          .slice(0, limit || 5)
+          .slice(0, 5)
 
         return { topConsumers: sorted, currency: 'ETB' }
       },
@@ -177,34 +168,29 @@ export async function POST(req: Request) {
     }),
 
     getFoodMenu: tool({
-      description: 'Get all food items with their prices',
-      inputSchema: z.object({
-        activeOnly: z.boolean().nullable().describe('If true, only return active items'),
-      }),
-      execute: async ({ activeOnly }) => {
-        let query = supabase.from('foods').select('*').order('name')
-        if (activeOnly) {
-          query = query.eq('is_active', true)
-        }
-        const { data, error } = await query
+      description: 'Get all active food items with their prices',
+      inputSchema: z.object({}),
+      execute: async () => {
+        const { data, error } = await supabase
+          .from('foods')
+          .select('*')
+          .eq('is_active', true)
+          .order('name')
         if (error) return { error: error.message }
         return { foods: data, currency: 'ETB' }
       },
     }),
 
     getMostPopularFood: tool({
-      description: 'Get the most popular food items by consumption frequency',
-      inputSchema: z.object({
-        limit: z.number().min(1).max(10).nullable().describe('Number of items to return'),
-      }),
-      execute: async ({ limit }) => {
+      description: 'Get the most popular food items by how many times they were ordered',
+      inputSchema: z.object({}),
+      execute: async () => {
         const { data, error } = await supabase
           .from('consumptions')
           .select('food_id, quantity, foods(name)')
 
         if (error) return { error: error.message }
 
-        // Aggregate by food
         const foodTotals = new Map<string, { name: string; count: number }>()
         data?.forEach((c) => {
           const foodId = c.food_id
@@ -217,23 +203,21 @@ export async function POST(req: Request) {
         const sorted = Array.from(foodTotals.entries())
           .map(([id, { name, count }]) => ({ id, name, totalQuantity: count }))
           .sort((a, b) => b.totalQuantity - a.totalQuantity)
-          .slice(0, limit || 5)
+          .slice(0, 5)
 
         return { popularFoods: sorted }
       },
     }),
 
     getRecentTransactions: tool({
-      description: 'Get recent transactions (deposits and consumptions)',
-      inputSchema: z.object({
-        limit: z.number().min(1).max(20).nullable().describe('Number of transactions to return'),
-      }),
-      execute: async ({ limit }) => {
+      description: 'Get the 10 most recent transactions',
+      inputSchema: z.object({}),
+      execute: async () => {
         const { data, error } = await supabase
           .from('transactions')
           .select('*, members(name)')
           .order('created_at', { ascending: false })
-          .limit(limit || 10)
+          .limit(10)
 
         if (error) return { error: error.message }
         return { transactions: data, currency: 'ETB' }
