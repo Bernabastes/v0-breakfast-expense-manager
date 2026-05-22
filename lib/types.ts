@@ -3,6 +3,7 @@ export interface Member {
   name: string
   email: string | null
   balance: number
+  pin_hash: string | null
   created_at: string
   updated_at: string
 }
@@ -12,6 +13,7 @@ export interface Food {
   name: string
   price: number
   is_active: boolean
+  image_url: string | null
   created_at: string
   updated_at: string
 }
@@ -55,4 +57,32 @@ export interface DashboardStats {
   totalConsumptions: number
   totalBalance: number
   memberCount: number
+}
+
+export interface SavingsPot {
+  id: string
+  name: string
+  description: string | null
+  target_amount: number | null
+  current_amount: number
+  created_at: string
+  updated_at: string
+}
+
+export interface SavingsContribution {
+  id: string
+  pot_id: string
+  member_id: string
+  amount: number
+  notes: string | null
+  created_at: string
+  member?: Member
+}
+
+export interface SavingsWithdrawal {
+  id: string
+  pot_id: string
+  amount: number
+  reason: string
+  created_at: string
 }
