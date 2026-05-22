@@ -16,6 +16,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Plus } from 'lucide-react'
+import { notifyTelegram } from '@/lib/telegram/notify-client'
 
 export function AddMemberDialog() {
   const [open, setOpen] = useState(false)
@@ -36,6 +37,10 @@ export function AddMemberDialog() {
     })
 
     if (!error) {
+      notifyTelegram({
+        type: 'member_added',
+        data: { memberName: name, email: email || undefined, balance: 0 },
+      })
       setName('')
       setEmail('')
       setOpen(false)

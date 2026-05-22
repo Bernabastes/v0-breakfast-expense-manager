@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Check, Minus, Plus } from 'lucide-react'
+import { notifyTelegram } from '@/lib/telegram/notify-client'
 
 interface QuickAddConsumptionProps {
   members: Member[]
@@ -75,6 +76,8 @@ export function QuickAddConsumption({ members, foods }: QuickAddConsumptionProps
 
     const supabase = createClient()
     const today = new Date().toISOString().split('T')[0]
+    const summaryLines: string[] = []
+    let grandTotal = 0
 
     for (const [memberId, foodConsumptions] of Object.entries(consumptions)) {
       // Get current member balance
@@ -85,6 +88,8 @@ export function QuickAddConsumption({ members, foods }: QuickAddConsumptionProps
         .single()
 
       let runningBalance = Number(member?.balance || 0)
+      let memberTotal = 0
+      const memberName = members.find((m) => m.id === memberId)?.name ?? 'Member'
 
       for (const [foodId, quantity] of Object.entries(foodConsumptions)) {
         const food = foods.find((f) => f.id === foodId)
@@ -93,6 +98,8 @@ export function QuickAddConsumption({ members, foods }: QuickAddConsumptionProps
         const unitPrice = Number(food.price)
         const totalPrice = unitPrice * quantity
         runningBalance -= totalPrice
+        memberTotal += totalPrice
+        grandTotal += totalPrice
 
         // Insert consumption
         const { data: consumption } = await supabase
@@ -129,7 +136,19 @@ export function QuickAddConsumption({ members, foods }: QuickAddConsumptionProps
           updated_at: new Date().toISOString(),
         })
         .eq('id', memberId)
+
+      summaryLines.push(`${memberName}: ${memberTotal.toLocaleString()} ETB`)
     }
+
+    notifyTelegram({
+      type: 'consumption_bulk',
+      data: {
+        memberCount: Object.keys(consumptions).length,
+        totalAmount: grandTotal,
+        summary: summaryLines.join('\n'),
+        date: today,
+      },
+    })
 
     setConsumptions({})
     setSuccess(true)

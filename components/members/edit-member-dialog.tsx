@@ -17,6 +17,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Pencil } from 'lucide-react'
+import { notifyTelegram } from '@/lib/telegram/notify-client'
 
 interface EditMemberDialogProps {
   member: Member
@@ -44,6 +45,14 @@ export function EditMemberDialog({ member }: EditMemberDialogProps) {
       .eq('id', member.id)
 
     if (!error) {
+      notifyTelegram({
+        type: 'member_updated',
+        data: {
+          memberName: name,
+          email: email || undefined,
+          balance: Number(member.balance),
+        },
+      })
       setOpen(false)
       router.refresh()
     }

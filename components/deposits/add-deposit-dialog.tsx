@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Plus } from 'lucide-react'
+import { notifyTelegram } from '@/lib/telegram/notify-client'
 
 interface AddDepositDialogProps {
   members: Member[]
@@ -84,6 +85,17 @@ export function AddDepositDialog({ members }: AddDepositDialogProps) {
         balance_after: newBalance,
         reference_id: deposit.id,
         description: `Deposit${notes ? ': ' + notes : ''}`,
+      })
+
+      const memberName = members.find((m) => m.id === memberId)?.name ?? 'Member'
+      notifyTelegram({
+        type: 'deposit_added',
+        data: {
+          memberName,
+          amount: depositAmount,
+          balanceAfter: newBalance,
+          notes: notes || undefined,
+        },
       })
 
       setMemberId('')

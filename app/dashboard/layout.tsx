@@ -10,7 +10,8 @@ import {
   UtensilsCrossed,
   PiggyBank, 
   Receipt, 
-  BarChart3, 
+  BarChart3,
+  MessageCircle,
   LogOut,
   Menu,
   X
@@ -23,6 +24,7 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import { LanguageSelector } from '@/components/language-selector'
 import { useLanguage } from '@/lib/i18n/language-context'
 import { AIChatbot } from '@/components/ai-chatbot'
+import { TelegramAutoSetup } from '@/components/telegram-auto-setup'
 
 export default function DashboardLayout({
   children,
@@ -41,6 +43,7 @@ export default function DashboardLayout({
     { name: t.nav.deposits, href: '/dashboard/deposits', icon: PiggyBank },
     { name: t.nav.consumptions, href: '/dashboard/consumptions', icon: Receipt },
     { name: t.nav.reports, href: '/dashboard/reports', icon: BarChart3 },
+    { name: 'Telegram', href: '/dashboard/telegram', icon: MessageCircle },
   ]
 
   const handleLogout = async () => {
@@ -146,6 +149,8 @@ export default function DashboardLayout({
         </main>
       </div>
       
+      <TelegramAutoSetup />
+
       {/* Low balance notifications */}
       <LowBalanceAlert />
       

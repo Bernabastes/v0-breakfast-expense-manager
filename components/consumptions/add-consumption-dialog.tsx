@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Plus } from 'lucide-react'
+import { notifyTelegram } from '@/lib/telegram/notify-client'
 
 interface AddConsumptionDialogProps {
   members: Member[]
@@ -94,6 +95,19 @@ export function AddConsumptionDialog({ members, foods }: AddConsumptionDialogPro
         balance_after: newBalance,
         reference_id: consumption.id,
         description: `${selectedFood.name} x${qty}`,
+      })
+
+      const memberName = members.find((m) => m.id === memberId)?.name ?? 'Member'
+      notifyTelegram({
+        type: 'consumption_added',
+        data: {
+          memberName,
+          foodName: selectedFood.name,
+          quantity: qty,
+          amount: total,
+          balanceAfter: newBalance,
+          date,
+        },
       })
 
       setMemberId('')

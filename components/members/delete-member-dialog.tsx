@@ -16,6 +16,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Trash2 } from 'lucide-react'
+import { notifyTelegram } from '@/lib/telegram/notify-client'
 
 interface DeleteMemberDialogProps {
   member: Member
@@ -36,6 +37,13 @@ export function DeleteMemberDialog({ member }: DeleteMemberDialogProps) {
       .eq('id', member.id)
 
     if (!error) {
+      notifyTelegram({
+        type: 'member_deleted',
+        data: {
+          memberName: member.name,
+          balance: Number(member.balance),
+        },
+      })
       setOpen(false)
       router.refresh()
     }

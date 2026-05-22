@@ -23,6 +23,7 @@ import { useLanguage } from '@/lib/i18n/language-context'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import type { SavingsPot, SavingsContribution, SavingsWithdrawal, Member } from '@/lib/types'
+import { notifyTelegram } from '@/lib/telegram/notify-client'
 
 export default function SavingsPotPage() {
   const [pot, setPot] = useState<SavingsPot | null>(null)
@@ -85,6 +86,17 @@ export default function SavingsPotPage() {
       .update({ current_amount: pot.current_amount + amount })
       .eq('id', pot.id)
 
+    const memberName = members.find((m) => m.id === memberId)?.name ?? 'Member'
+    notifyTelegram({
+      type: 'savings_contribution',
+      data: {
+        memberName,
+        amount,
+        potBalance: pot.current_amount + amount,
+        notes: notes || undefined,
+      },
+    })
+
     toast.success(language === 'am' ? 'መዋጮ ተጨምሯል' : 'Contribution added')
     setContributeOpen(false)
     fetchData()
@@ -123,6 +135,15 @@ export default function SavingsPotPage() {
       .from('savings_pot')
       .update({ current_amount: pot.current_amount - amount })
       .eq('id', pot.id)
+
+    notifyTelegram({
+      type: 'savings_withdrawal',
+      data: {
+        amount,
+        reason,
+        potBalance: pot.current_amount - amount,
+      },
+    })
 
     toast.success(language === 'am' ? 'ገንዘብ ወጥቷል' : 'Withdrawal successful')
     setWithdrawOpen(false)

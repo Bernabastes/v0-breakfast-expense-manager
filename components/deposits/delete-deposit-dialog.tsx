@@ -16,6 +16,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Trash2 } from 'lucide-react'
+import { notifyTelegram } from '@/lib/telegram/notify-client'
 
 interface DeleteDepositDialogProps {
   deposit: Deposit
@@ -64,6 +65,17 @@ export function DeleteDepositDialog({ deposit }: DeleteDepositDialogProps) {
 
     // Delete the deposit
     await supabase.from('deposits').delete().eq('id', deposit.id)
+
+    const newBalance =
+      member != null ? Number(member.balance) - depositAmount : undefined
+    notifyTelegram({
+      type: 'deposit_deleted',
+      data: {
+        memberName: deposit.member?.name ?? 'Member',
+        amount: depositAmount,
+        balanceAfter: newBalance,
+      },
+    })
 
     setOpen(false)
     router.refresh()

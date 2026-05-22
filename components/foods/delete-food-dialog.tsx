@@ -16,6 +16,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Trash2 } from 'lucide-react'
+import { notifyTelegram } from '@/lib/telegram/notify-client'
 
 interface DeleteFoodDialogProps {
   food: Food
@@ -36,6 +37,10 @@ export function DeleteFoodDialog({ food }: DeleteFoodDialogProps) {
       .eq('id', food.id)
 
     if (!error) {
+      notifyTelegram({
+        type: 'food_deleted',
+        data: { foodName: food.name, price: Number(food.price) },
+      })
       setOpen(false)
       router.refresh()
     }

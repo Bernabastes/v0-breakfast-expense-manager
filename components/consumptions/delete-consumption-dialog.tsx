@@ -16,6 +16,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Trash2 } from 'lucide-react'
+import { notifyTelegram } from '@/lib/telegram/notify-client'
 
 interface DeleteConsumptionDialogProps {
   consumption: Consumption
@@ -64,6 +65,19 @@ export function DeleteConsumptionDialog({ consumption }: DeleteConsumptionDialog
 
     // Delete the consumption
     await supabase.from('consumptions').delete().eq('id', consumption.id)
+
+    const newBalance =
+      member != null ? Number(member.balance) + totalPrice : undefined
+    notifyTelegram({
+      type: 'consumption_deleted',
+      data: {
+        memberName: consumption.member?.name ?? 'Member',
+        foodName: consumption.food?.name ?? 'Unknown',
+        quantity: consumption.quantity,
+        amount: totalPrice,
+        balanceAfter: newBalance,
+      },
+    })
 
     setOpen(false)
     router.refresh()

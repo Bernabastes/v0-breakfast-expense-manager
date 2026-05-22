@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { AlertTriangle, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useLanguage } from '@/lib/i18n/language-context'
+import { notifyTelegram } from '@/lib/telegram/notify-client'
 
 interface LowBalanceMember {
   id: string
@@ -62,6 +63,16 @@ export function LowBalanceAlert() {
     if (newNotifications.length > 0) {
       setNotifications((prev) => [...prev, ...newNotifications])
       setNotifiedMembers(newNotifiedIds)
+      for (const n of newNotifications) {
+        notifyTelegram({
+          type: 'low_balance',
+          data: {
+            memberName: n.member.name,
+            balance: n.member.balance,
+            threshold: LOW_BALANCE_THRESHOLD,
+          },
+        })
+      }
     }
   }, [notifiedMembers])
 
@@ -131,6 +142,14 @@ export function LowBalanceAlert() {
                   },
                 ])
                 setNotifiedMembers((prev) => new Set([...prev, memberKey]))
+                notifyTelegram({
+                  type: 'low_balance',
+                  data: {
+                    memberName: member.name,
+                    balance,
+                    threshold: LOW_BALANCE_THRESHOLD,
+                  },
+                })
               }
             }
           }

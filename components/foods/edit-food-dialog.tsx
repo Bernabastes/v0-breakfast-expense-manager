@@ -17,6 +17,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Pencil } from 'lucide-react'
+import { notifyTelegram } from '@/lib/telegram/notify-client'
 
 interface EditFoodDialogProps {
   food: Food
@@ -44,6 +45,10 @@ export function EditFoodDialog({ food }: EditFoodDialogProps) {
       .eq('id', food.id)
 
     if (!error) {
+      notifyTelegram({
+        type: 'food_updated',
+        data: { foodName: name, price: parseFloat(price) },
+      })
       setOpen(false)
       router.refresh()
     }

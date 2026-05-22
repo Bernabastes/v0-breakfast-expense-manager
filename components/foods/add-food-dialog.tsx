@@ -16,6 +16,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Plus } from 'lucide-react'
+import { notifyTelegram } from '@/lib/telegram/notify-client'
 
 export function AddFoodDialog() {
   const [open, setOpen] = useState(false)
@@ -36,6 +37,10 @@ export function AddFoodDialog() {
     })
 
     if (!error) {
+      notifyTelegram({
+        type: 'food_added',
+        data: { foodName: name, price: parseFloat(price) },
+      })
       setName('')
       setPrice('')
       setOpen(false)
