@@ -1,4 +1,5 @@
-import { streamText, convertToModelMessages, UIMessage, tool, consumeStream } from 'ai'
+import { streamText, convertToModelMessages, UIMessage, tool } from 'ai'
+import { google } from '@ai-sdk/google'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 
@@ -279,7 +280,7 @@ Key points:
 - Be friendly and helpful`
 
   const result = streamText({
-    model: 'openai/gpt-4o-mini',
+    model: google('gemini-1.5-flash'),
     system: systemPrompt,
     messages: await convertToModelMessages(messages),
     tools,
@@ -287,8 +288,5 @@ Key points:
     abortSignal: req.signal,
   })
 
-  return result.toUIMessageStreamResponse({
-    originalMessages: messages,
-    consumeSseStream: consumeStream,
-  })
+  return result.toUIMessageStreamResponse()
 }
