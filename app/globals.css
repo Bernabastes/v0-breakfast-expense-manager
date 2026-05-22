@@ -123,3 +123,17 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes shrink-width {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+.animate-shrink-width {
+  animation-name: shrink-width;
+  animation-fill-mode: forwards;
+}

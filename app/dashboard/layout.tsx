@@ -18,15 +18,11 @@ import {
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
-
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Members', href: '/dashboard/members', icon: Users },
-  { name: 'Food Menu', href: '/dashboard/foods', icon: UtensilsCrossed },
-  { name: 'Deposits', href: '/dashboard/deposits', icon: PiggyBank },
-  { name: 'Consumptions', href: '/dashboard/consumptions', icon: Receipt },
-  { name: 'Reports', href: '/dashboard/reports', icon: BarChart3 },
-]
+import { LowBalanceAlert } from '@/components/notifications/low-balance-alert'
+import { ThemeToggle } from '@/components/theme-toggle'
+import { LanguageSelector } from '@/components/language-selector'
+import { useLanguage } from '@/lib/i18n/language-context'
+import { AIChatbot } from '@/components/ai-chatbot'
 
 export default function DashboardLayout({
   children,
@@ -36,6 +32,16 @@ export default function DashboardLayout({
   const router = useRouter()
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { t } = useLanguage()
+
+  const navigation = [
+    { name: t.nav.dashboard, href: '/dashboard', icon: LayoutDashboard },
+    { name: t.nav.members, href: '/dashboard/members', icon: Users },
+    { name: t.nav.foodMenu, href: '/dashboard/foods', icon: UtensilsCrossed },
+    { name: t.nav.deposits, href: '/dashboard/deposits', icon: PiggyBank },
+    { name: t.nav.consumptions, href: '/dashboard/consumptions', icon: Receipt },
+    { name: t.nav.reports, href: '/dashboard/reports', icon: BarChart3 },
+  ]
 
   const handleLogout = async () => {
     const supabase = createClient()
@@ -63,16 +69,20 @@ export default function DashboardLayout({
           <div className="flex h-16 items-center justify-between gap-2 border-b px-6">
             <div className="flex items-center gap-2">
               <Coffee className="h-6 w-6 text-amber-600" />
-              <span className="font-semibold">Breakfast Manager</span>
+              <span className="font-semibold text-sm">{t.appName}</span>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="lg:hidden"
-              onClick={() => setSidebarOpen(false)}
-            >
-              <X className="h-5 w-5" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <LanguageSelector />
+              <ThemeToggle />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="lg:hidden"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
           
           {/* Navigation */}
@@ -82,7 +92,7 @@ export default function DashboardLayout({
                 (item.href !== '/dashboard' && pathname.startsWith(item.href))
               return (
                 <Link
-                  key={item.name}
+                  key={item.href}
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
                   className={cn(
@@ -107,7 +117,7 @@ export default function DashboardLayout({
               onClick={handleLogout}
             >
               <LogOut className="h-5 w-5" />
-              Sign out
+              {t.nav.signOut}
             </Button>
           </div>
         </div>
@@ -126,7 +136,7 @@ export default function DashboardLayout({
           </Button>
           <div className="flex items-center gap-2">
             <Coffee className="h-6 w-6 text-amber-600" />
-            <span className="font-semibold">Breakfast Manager</span>
+            <span className="font-semibold">{t.appName}</span>
           </div>
         </header>
         
@@ -135,6 +145,12 @@ export default function DashboardLayout({
           {children}
         </main>
       </div>
+      
+      {/* Low balance notifications */}
+      <LowBalanceAlert />
+      
+      {/* AI Chatbot */}
+      <AIChatbot />
     </div>
   )
 }
